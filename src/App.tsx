@@ -1,7 +1,9 @@
+import WeeklyTracker from "./pages/WeeklyTracker";
+
 function App() {
   return (
     <>
-      <div></div>
+      <WeeklyTracker />
     </>
   );
 }
