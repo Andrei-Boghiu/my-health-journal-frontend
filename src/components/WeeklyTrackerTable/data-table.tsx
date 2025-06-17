@@ -2,36 +2,16 @@
 
 import { type ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useState, useEffect } from "react";
 import type { ActivityStatus } from "./types";
+import { isWeekDayColumn, statusOrder, statusStyles } from "./helpers";
 
-const statusStyles = {
-  pending: "bg-yellow-100 text-yellow-800 border-yellow-300",
-  success: "bg-green-100 text-green-800 border-green-300",
-  failed: "bg-red-100 text-red-800 border-red-300",
-};
-
-const statusOrder: ActivityStatus[] = ["pending", "success", "failed"];
-
-interface DataTableProps<TData, TValue> {
+export interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onDataChange?: (data: TData[]) => void;
 }
 
-export function DataTable<TData, TValue>({ columns, data: initialData, onDataChange }: DataTableProps<TData, TValue>) {
-  const [data, setData] = useState<TData[]>(initialData);
-
-  useEffect(() => {
-    setData(initialData);
-  }, [initialData]);
-
-  const weekDayKeys = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
-
-  const isWeekDayColumn = (columnId: string) => {
-    return weekDayKeys.includes(columnId.toLowerCase());
-  };
-
+export function DataTable<TData, TValue>({ columns, data, onDataChange }: DataTableProps<TData, TValue>) {
   const getNextStatus = (currentStatus: ActivityStatus): ActivityStatus => {
     const currentIndex = statusOrder.indexOf(currentStatus);
     return statusOrder[(currentIndex + 1) % statusOrder.length];
@@ -46,7 +26,6 @@ export function DataTable<TData, TValue>({ columns, data: initialData, onDataCha
     const nextStatus = getNextStatus(currentStatus);
 
     row[columnId] = nextStatus;
-    setData(newData);
 
     onDataChange?.(newData);
   };
@@ -67,8 +46,8 @@ export function DataTable<TData, TValue>({ columns, data: initialData, onDataCha
         <button
           onClick={() => handleCellClick(rowIndex, columnId)}
           className={`
-            w-full h-full px-3 py-2 rounded-md border-2 font-medium text-sm
-            transition-all duration-200 hover:scale-105 hover:shadow-md
+            w-full h-full px-2 py-1 sm:px-3 sm:py-2 rounded-md border-2 font-medium 
+            text-xs sm:text-sm transition-all duration-200 hover:scale-105 hover:shadow-md
             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
             ${statusStyles[status]}
           `}
@@ -82,9 +61,9 @@ export function DataTable<TData, TValue>({ columns, data: initialData, onDataCha
   };
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
+    <div className="overflow-x-auto rounded-md border">
+      <Table className="min-w-[700px]">
+        <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
@@ -102,7 +81,7 @@ export function DataTable<TData, TValue>({ columns, data: initialData, onDataCha
             table.getRowModel().rows.map((row, rowIndex) => (
               <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="p-1">
+                  <TableCell key={cell.id} className="p-1 sm:p-2 text-xs sm:text-sm">
                     {renderCell(cell, rowIndex)}
                   </TableCell>
                 ))}
